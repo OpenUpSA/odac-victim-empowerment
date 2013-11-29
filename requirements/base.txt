@@ -1,0 +1,3 @@
+Flask
+simplejson
+requests==2.0.1
