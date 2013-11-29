@@ -6,3 +6,7 @@ LOGGER_NAME = "msg_handler_logger"  # make sure this is not the same as the name
 DEBUG = True
 
 SECRET_KEY = "AEORJAEONIAEGCBGKMALMAENFXGOAERGN"
+
+ACCESS_TOKEN = ''
+ACCOUNT_KEY = ''
+CONVERSATION_KEY = ''
