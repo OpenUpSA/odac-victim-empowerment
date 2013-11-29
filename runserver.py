@@ -1,4 +1,4 @@
-from frontend import app
+from msg_handler import app
 
 if __name__ == "__main__":
     # run Flask dev-server
