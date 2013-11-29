@@ -15,19 +15,27 @@ def index():
     return make_response(msg)
 
 
-@app.route('/message/')
+@app.route('/message/', methods=['GET', 'POST'])
 def message():
     """
 
     """
 
-    return make_response('Message view.')
+    logger.debug("MESSAGE endpoint called")
+    tmp = request.get_json()
+    logger.debug(simplejson.dumps(tmp, indent=4))
+
+    return make_response("OK")
 
 
-@app.route('/event/')
+@app.route('/event/', methods=['GET', 'POST'])
 def event():
     """
 
     """
 
-    return make_response('Event view.')
+    logger.debug("EVENT endpoint called")
+    tmp = request.get_json()
+    logger.debug(simplejson.dumps(tmp, indent=4))
+
+    return make_response("OK")
