@@ -1,5 +1,6 @@
 from flask import request, make_response, url_for, render_template, abort, send_from_directory
 from msg_handler import app
+from msg_handler.menu import menu
 import requests
 import simplejson
 import time
@@ -12,22 +13,6 @@ redis = Redis()
 #if __name__ == "__main__":
 #    f = open('msg_example.json', 'r')
 #    msg_test = simplejson.loads(f.read())
-
-
-main_menu = {
-    1: "Immediately after the incident.",
-    2: "Going to the Hospital / Clinic.",
-    3: "SAPS",
-    4: "Court",
-    5: "Welfare / NGO\'s"
-}
-
-menu_1 = {
-    1: "Reporting",
-    2: "Health",
-    3: "Evidence",
-    4: "Intoxication"
-}
 
 
 def mark_online(user_id):
@@ -85,12 +70,31 @@ def reply(message_id, content, session_event="resume"):
     return
 
 
-def serialize_options(options_dict):
+def serialize_options(submenu):
 
-    options_str = ""
-    for key, val in options_dict.iteritems():
-        options_str += "\n" + str(key) + ": " + val
+    title = submenu[0]
+    items = submenu[1]
+
+    options_str = title
+    for i in range(len(items)):
+        item = items[i]
+        if len(item) > 1:
+            options_str += "\n" + str(i+1) + ": " + item[0]
+        else:
+            options_str += "\n" + item[0]
     return options_str
+
+
+def generate_output(selected_item=None):
+
+    current_menu = 0
+    submenu = menu
+
+    if selected_item:
+        submenu = menu[1][selected_item-1]
+
+    str_out = serialize_options(submenu)
+    return str_out
 
 
 @app.route('/message/', methods=['GET', 'POST'])
@@ -111,11 +115,11 @@ def message():
             message_id = msg['message_id']
             mark_online(msg['from_addr'])
             try:
-                menu_item = int(content)
-                reply(message_id, serialize_options(menu_1))
+                selected_item = int(content)
+                reply(message_id, generate_output(selected_item))
             except Exception:
                 if not content:
-                    reply(message_id, serialize_options(main_menu))
+                    reply(message_id, generate_output())
                 else:
                     reply(message_id, 'You have selected %s.' % (content,), session_event="close")
                 pass
