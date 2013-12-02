@@ -6,6 +6,26 @@ from datetime import datetime, date
 from msg_handler import logger
 import requests
 
+#if __name__ == "__main__":
+#    f = open('msg_example.json', 'r')
+#    msg_test = simplejson.loads(f.read())
+
+
+main_menu = {
+    1: "Immediately after the incident.",
+    2: "Going to the Hospital / Clinic.",
+    3: "SAPS",
+    4: "Court",
+    5: "Welfare / NGO\'s"
+}
+
+menu_1 = {
+    1: "Reporting",
+    2: "Health",
+    3: "Evidence",
+    4: "Intoxication"
+}
+
 
 @app.route('/')
 def index():
@@ -28,10 +48,18 @@ def reply(message_id, content, session_event="resume"):
         "in_reply_to": message_id,
         "content": content,
         "session_event": session_event,
-    }
+        }
     requests.put(message_url, auth=(account_key, access_token),
-        data=simplejson.dumps(payload))
+                 data=simplejson.dumps(payload))
     return
+
+
+def serialize_options(options_dict):
+
+    options_str = ""
+    for key, val in options_dict.iteritems():
+        options_str += "\n" + str(key) + ": " + val
+    return options_str
 
 
 @app.route('/message/', methods=['GET', 'POST'])
@@ -50,26 +78,28 @@ def message():
         try:
             content = msg['content']
             message_id = msg['message_id']
-
-            if not content:
-                reply(message_id, 'Hi, what is your name?')
-            else:
-                reply(message_id, 'Thanks %s!' % (content,), session_event="close")
+            try:
+                menu_item = int(content)
+                reply(message_id, serialize_options(menu_1))
+            except Exception:
+                if not content:
+                    reply(message_id, serialize_options(main_menu))
+                else:
+                    reply(message_id, 'You have selected %s.' % (content,), session_event="close")
+                pass
         except Exception as e:
             logger.exception(e)
             pass
-
     return make_response("OK")
 
 
-#@app.route('/event/', methods=['GET', 'POST'])
-#def event():
-#    """
-#
-#    """
-#
-#    logger.debug("EVENT endpoint called")
-#    tmp = request.get_json()
-#    logger.debug(simplejson.dumps(tmp, indent=4))
-#
-#    return make_response("OK")
+@app.route('/event/', methods=['GET', 'POST'])
+def event():
+    """
+
+    """
+
+    logger.debug("EVENT endpoint called")
+    tmp = request.get_json()
+    logger.debug(simplejson.dumps(tmp, indent=4))
+    return make_response("OK")
