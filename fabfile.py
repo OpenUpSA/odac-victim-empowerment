@@ -25,8 +25,6 @@ def install_redis():
     """
     sudo('apt-get install tcl8.5')
     with cd(env['code_dir']):
-
-
         sudo('wget http://download.redis.io/redis-stable.tar.gz')
         sudo('tar xvzf redis-stable.tar.gz')
         with cd('redis-stable'):
