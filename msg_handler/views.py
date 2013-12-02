@@ -40,8 +40,8 @@ def mark_menu(user_id, menu_id):
 
 def get_current_menu(user_id):
     last_menu = redis.get('user-menu/%s' % user_id)
-    if last_menu is None:
-        return None
+    if last_menu in [None, "None"]:
+        return ""
     return last_menu
 
 
@@ -86,6 +86,9 @@ def serialize_options(submenu):
     items = submenu[1]
 
     options_str = title
+
+    if not title == "Main menu":
+        options_str += "\n0: back"
     for i in range(len(items)):
         item = items[i]
         if len(item) > 1:
@@ -100,17 +103,23 @@ def generate_output(user_id, selected_item=None):
     current_menu = get_current_menu(user_id)
     logger.debug("CURRENT MENU: " + str(current_menu))
 
+    if current_menu and selected_item == 0:
+        current_menu = current_menu[0:-1]
+        selected_item = None
+
     submenu = menu
-    if current_menu:
+    if current_menu and len(current_menu) > 0:
         for i in current_menu:
             submenu = submenu[1][int(i)]
 
+    if current_menu is None:
+        current_menu = ""
+
     if selected_item:
-        if current_menu is None:
-           current_menu = ""
         submenu = submenu[1][selected_item-1]
         current_menu += str(selected_item-1)
-        mark_menu(user_id, current_menu)
+
+    mark_menu(user_id, current_menu)
 
     str_out = serialize_options(submenu)
     return str_out
@@ -134,16 +143,12 @@ def message():
             content = msg['content']
             message_id = msg['message_id']
             mark_online(user_id)
+            selected_item = None
             try:
                 selected_item = int(content)
-                reply(message_id, generate_output(user_id, selected_item))
-            except Exception as e:
-                logger.exception(e)
-                if not content:
-                    reply(message_id, generate_output(user_id))
-                else:
-                    reply(message_id, 'You have selected %s.' % (content,), session_event="close")
+            except (ValueError, TypeError):
                 pass
+            reply(message_id, generate_output(user_id, selected_item))
         except Exception as e:
             logger.exception(e)
             pass
