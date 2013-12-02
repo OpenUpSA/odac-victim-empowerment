@@ -28,11 +28,21 @@ def mark_online(user_id):
     p.execute()
 
 
-def get_user_last_activity(user_id):
-    last_active = redis.get('user-activity/%s' % user_id)
-    if last_active is None:
+def mark_menu(user_id, menu_id):
+    now = int(time.time())
+    expires = now + (app.config['ONLINE_LAST_MINUTES'] * 60) + 10
+    user_key = 'user-menu/%s' % user_id
+    p = redis.pipeline()
+    p.set(user_key, menu_id)
+    p.expireat(user_key, expires)
+    p.execute()
+
+
+def get_current_menu(user_id):
+    last_menu = redis.get('user-menu/%s' % user_id)
+    if last_menu is None:
         return None
-    return datetime.utcfromtimestamp(int(last_active))
+    return last_menu
 
 
 def get_online_users():
@@ -85,13 +95,22 @@ def serialize_options(submenu):
     return options_str
 
 
-def generate_output(selected_item=None):
+def generate_output(user_id, selected_item=None):
 
-    current_menu = 0
+    current_menu = get_current_menu(user_id)
+    logger.debug("CURRENT MENU: " + str(current_menu))
+
     submenu = menu
+    if current_menu:
+        for i in current_menu:
+            submenu = submenu[1][int(i)]
 
     if selected_item:
-        submenu = menu[1][selected_item-1]
+        if current_menu is None:
+           current_menu = ""
+        submenu = submenu[1][selected_item-1]
+        current_menu += str(selected_item-1)
+        mark_menu(user_id, current_menu)
 
     str_out = serialize_options(submenu)
     return str_out
@@ -111,15 +130,17 @@ def message():
         logger.debug(simplejson.dumps(msg, indent=4))
 
         try:
+            user_id = msg['from_addr']
             content = msg['content']
             message_id = msg['message_id']
-            mark_online(msg['from_addr'])
+            mark_online(user_id)
             try:
                 selected_item = int(content)
-                reply(message_id, generate_output(selected_item))
-            except Exception:
+                reply(message_id, generate_output(user_id, selected_item))
+            except Exception as e:
+                logger.exception(e)
                 if not content:
-                    reply(message_id, generate_output())
+                    reply(message_id, generate_output(user_id))
                 else:
                     reply(message_id, 'You have selected %s.' % (content,), session_event="close")
                 pass
