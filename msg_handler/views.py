@@ -8,11 +8,8 @@ from datetime import datetime, date
 from msg_handler import logger
 import requests
 from redis import Redis
-redis = Redis()
 
-#if __name__ == "__main__":
-#    f = open('msg_example.json', 'r')
-#    msg_test = simplejson.loads(f.read())
+redis = Redis()
 
 
 def mark_online(user_id):
@@ -28,21 +25,24 @@ def mark_online(user_id):
     p.execute()
 
 
-def mark_menu(user_id, menu_id):
+def mark_menu(user_id, menu_marker):
+    try:
+        tmp = int(menu_marker)
+    except Exception:
+        menu_marker = None
+        pass
     now = int(time.time())
     expires = now + (app.config['ONLINE_LAST_MINUTES'] * 60) + 10
     user_key = 'user-menu/%s' % user_id
     p = redis.pipeline()
-    p.set(user_key, menu_id)
+    p.set(user_key, menu_marker)
     p.expireat(user_key, expires)
     p.execute()
 
 
-def get_current_menu(user_id):
-    last_menu = redis.get('user-menu/%s' % user_id)
-    if last_menu in [None, "None"]:
-        return ""
-    return last_menu
+def get_user_menu(user_id):
+    menu_marker = redis.get('user-menu/%s' % user_id)
+    return menu_marker
 
 
 def get_online_users():
@@ -55,7 +55,7 @@ def get_online_users():
 @app.route('/')
 def index():
     """
-
+    Basic index view, listing online users.
     """
 
     msg = 'Online: %s' % ', '.join(get_online_users())
@@ -63,6 +63,9 @@ def index():
 
 
 def reply(message_id, content, session_event="resume"):
+    """
+    Send USSD reply vie vumi's HTTP API.
+    """
 
     access_token = app.config['ACCESS_TOKEN']
     account_key = app.config['ACCOUNT_KEY']
@@ -80,15 +83,22 @@ def reply(message_id, content, session_event="resume"):
     return
 
 
-def serialize_options(submenu):
+def serialize_options(sub_menu):
+    """
+    Return a string representation of a given menu.
+    """
 
-    title = submenu[0]
-    items = submenu[1]
+    title = sub_menu[0]
+    items = sub_menu[1]
 
+    # add title
     options_str = title
 
-    if not title == "Main menu":
+    # add 'back' option
+    if not sub_menu == menu:
         options_str += "\n0: back"
+
+    # add menu items
     for i in range(len(items)):
         item = items[i]
         if len(item) > 1:
@@ -99,36 +109,60 @@ def serialize_options(submenu):
 
 
 def generate_output(user_id, selected_item=None):
+    """
+    Find the relevant menu to display, based on user input and saved session info.
+    """
 
-    current_menu = get_current_menu(user_id)
-    logger.debug("CURRENT MENU: " + str(current_menu))
+    # retrieve user's previous menu, if available
+    previous_menu = get_user_menu(user_id)
+    logger.debug("PREVIOUS MENU: " + str(previous_menu))
 
-    if current_menu and selected_item == 0:
-        current_menu = current_menu[0:-1]
+    # handle 'back' links
+    if previous_menu and selected_item == 0:
+        if len(previous_menu) == 1:
+            previous_menu = None
+        else:
+            previous_menu = previous_menu[0:-1]
         selected_item = None
 
-    submenu = menu
-    if current_menu and len(current_menu) > 0:
-        for i in current_menu:
-            submenu = submenu[1][int(i)]
+    # find relevant submenu
+    sub_menu = menu
+    if previous_menu:
+        try:
+            for i in previous_menu:
+                sub_menu = sub_menu[1][int(i)]
+        except Exception:
+            logger.error("Could not retrieve previous menu: " + str(previous_menu))
+            previous_menu = None
+            pass
 
-    if current_menu is None:
-        current_menu = ""
-
+    # select the given option
     if selected_item:
-        submenu = submenu[1][selected_item-1]
-        current_menu += str(selected_item-1)
+        try:
+            if len(sub_menu) == 2:  # otherwise this is an endpoint, not a menu
+                sub_menu = sub_menu[1][selected_item-1]
+                if previous_menu:
+                    previous_menu += str(selected_item-1)
+                else:
+                    previous_menu = str(selected_item-1)
+            else:
+                raise IndexError
+        except IndexError:
+            logger.debug("Invalid option chosen.")
+            pass
 
-    mark_menu(user_id, current_menu)
+    # save user's menu to the session
+    mark_menu(user_id, previous_menu)
 
-    str_out = serialize_options(submenu)
+    # return the menu's string representation
+    str_out = serialize_options(sub_menu)
     return str_out
 
 
 @app.route('/message/', methods=['GET', 'POST'])
 def message():
     """
-
+    Handle incoming USSD messages, passed as HTTP requests via the vumi HTTP API.
     """
 
     logger.debug("MESSAGE endpoint called")
@@ -148,7 +182,11 @@ def message():
                 selected_item = int(content)
             except (ValueError, TypeError):
                 pass
-            reply(message_id, generate_output(user_id, selected_item))
+            reply_content = generate_output(user_id, selected_item)
+            if app.debug:
+                logger.debug(reply_content)
+            else:
+                reply(message_id, reply_content)
         except Exception as e:
             logger.exception(e)
             pass
