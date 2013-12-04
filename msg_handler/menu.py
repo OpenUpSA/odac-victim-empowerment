@@ -1,26 +1,36 @@
 menu = (
     "Main menu", [
         (
-            "Immediately after the Incident",
+            "I've been raped / sexually abused what do I do now?",
             [
                 (
+                    "Important Information", [
+                        ["Make sure that you are safe. You can call the police to come to help you"],
+                        ["It is important to go to a hospital or clinic as soon as possible. HIV medications need to be taken within 72 hours (3 days) of the offence"],
+                        ["You may go directly to a hospital for treatment, or to the police (SAPS) to report the crime, or you may report to a social worker"],
+                        ["Try not to wash, shower or change your clothes before you report to the hospital or clinic or the police. If a condom was used keep it for evidence"],
+                        ["If there was contact in your mouth, try not to eat or drink anything, to rinse your mouth or to brush your teeth"],
+                        ]
+                ),
+                (
                     "Reporting", [
-                        ["After a sexual offence you may go directly to a hospital for treatment, or to the police (SAPS) to report the crime, or you may report to a social worker"],
+                        ["You can take someone you trust with you for support"],
+                        ["You may go directly to a hospital for treatment, or to the nearest police station to report the crime, or you may report to a social worker"],
                         ["A family member, friend, psychologist or teacher can report on your behalf, but you will have to give a statement later if you want to lay a criminal charge"],
                         ]
                 ),
                 (
-                    "Health", [
-                        ["It is important to go to a hospital or clinic as soon as possible. Some medications need to be taken within 72 hours (3 days) of the offence"],
-                        ["You do not need to report to SAPS first in order to get medical services. If you seek medical treatment first, you can still report the crime to SAPS later"],
-                        ["If you go to a police station first, it is very important that you go to a hospital for medical treatment soon after. SAPS members must assist you in doing this"],
+                    "Medical Treatment", [
+                        ["It is important to go to a hospital or clinic as soon as possible. HIV medications need to be taken within 72 hours (3 days) of the offence"],
+                        ["You don't need to report to the police first in order to get medical services. If you seek medical treatment first, you can still report to the police later"],
+                        ["If you go to a police station first the police should take you to the hospital as soon as possible"],
                         ]
                 ),
                 (
                     "Evidence", [
-                        ["To open a case at SAPS you must have a forensic exam. Try not to wash, bath, shower or change your clothes before you report to the hospital / clinic or SAPS"],
-                        ["If you must change, put the clothes in a paper bag or wrap in newspaper. If there was contact in your mouth, try not to eat or drink anything or to brush teeth"],
-                        ["These steps will preserve evidence about the perpetrator and crime, but don't worry if you have already done something, it is not always possible to wait"],
+                        ["Part of the police investigation is a medical examination for evidence. Try not to wash, shower or change your clothes before you go to the hospital or police"],
+                        ["If you change clothes, put them in a paper bag or wrap in newspaper. If there was contact in your mouth, try not to rinse, brush teeth, eat or drink anything"],
+                        ["These steps will preserve evidence about the rapist(s) and crime, but don't worry if you have already done something, it is not always possible to wait"],
                         ["If you are wearing the same clothes, the nurse will take your clothes to give to the police for evidence. Try to take clean clothes along with you"],
                         ["If you told someone about what happened to you soon after the offence, he/she can be a witness. You should record their name and contact details"],
                         ]
@@ -85,7 +95,7 @@ menu = (
         ),
 
         (
-            "SAPS",
+            "Police Station",
             [
                 (
                     "Reporting to SAPS", [
@@ -184,7 +194,7 @@ menu = (
             ]
         ),
         (
-            "Welfare / NGO",
+            "Counselling Service",
             [
                 (
                     "Safety", [
@@ -234,15 +244,3 @@ menu = (
         #)
     ]
 )
-
-#if __name__ == "__main__":
-#    from msg_handler.views import serialize_options
-#
-#    print serialize_options(menu)
-#
-#    print "\n"
-#    print serialize_options(menu[1][0])
-#
-#    for i in range(len(menu[1][0][1])):
-#        print "\n"
-#        print serialize_options(menu[1][0][1][i])
