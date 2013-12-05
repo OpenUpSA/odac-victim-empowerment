@@ -94,7 +94,7 @@ def reply(message_id, content, session_event="resume"):
     return
 
 
-def serialize_options(sub_menu, selected_item):
+def serialize_options(sub_menu, selected_endpoint=None):
     """
     Return a string representation of a given menu.
     """
@@ -110,12 +110,22 @@ def serialize_options(sub_menu, selected_item):
         options_str += "\n0: Back"
 
     # add menu items
-    for i in range(len(items)):
-        item = items[i]
-        try:
+    try:
+        for i in range(len(items)):
+            item = items[i]
             options_str += "\n" + str(i+1) + ": " + item['title']
-        except TypeError:
-            options_str += "\n" + item
+    except TypeError:
+        # this is an endpoint list
+        next = 2
+        item = items[0]
+        if selected_endpoint:
+            try:
+                item = items[selected_endpoint]
+                next = selected_endpoint + 2
+            except IndexError:
+                selected_endpoint = 0
+        options_str += "\n" + str(next) + ": Next"
+        options_str += "\n" + item
     return options_str
 
 
@@ -137,6 +147,7 @@ def generate_output(user_id, selected_item=None):
         selected_item = None
 
     sub_menu = menu
+    selected_endpoint = None
     try:
         # select user's previous menu
         if previous_menu:
@@ -158,6 +169,8 @@ def generate_output(user_id, selected_item=None):
                         previous_menu += str(index)
                     else:
                         previous_menu = str(index)
+                else:
+                    selected_endpoint = index
             except TypeError:
                 # This is not a new menu, but an endpoint
                 logger.debug("endpoint")
@@ -176,7 +189,7 @@ def generate_output(user_id, selected_item=None):
 
     # return the menu's string representation
     logger.debug(simplejson.dumps(sub_menu, indent=4))
-    str_out = serialize_options(sub_menu, selected_item)
+    str_out = serialize_options(sub_menu, selected_endpoint)
     return str_out
 
 
