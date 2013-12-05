@@ -41,7 +41,18 @@ def mark_menu(user_id, menu_marker):
 
 
 def get_user_menu(user_id):
+    """
+    Retrieve stored session info.
+    """
+
     menu_marker = redis.get('user-menu/%s' % user_id)
+    try:
+        # ensure the retrieved item can be converted to int
+        tmp = int(menu_marker)
+    except Exception:
+        logger.exception("Bad session data encountered.")
+        menu_marker = None
+        pass
     return menu_marker
 
 
@@ -83,28 +94,28 @@ def reply(message_id, content, session_event="resume"):
     return
 
 
-def serialize_options(sub_menu):
+def serialize_options(sub_menu, selected_item):
     """
     Return a string representation of a given menu.
     """
 
-    title = sub_menu[0]
-    items = sub_menu[1]
+    title = sub_menu['title']
+    items = sub_menu['content']
 
     # add title
     options_str = title
 
     # add 'back' option
     if not sub_menu == menu:
-        options_str += "\n0: back"
+        options_str += "\n0: Back"
 
     # add menu items
     for i in range(len(items)):
         item = items[i]
-        if len(item) > 1:
-            options_str += "\n" + str(i+1) + ": " + item[0]
-        else:
-            options_str += "\n" + item[0]
+        try:
+            options_str += "\n" + str(i+1) + ": " + item['title']
+        except TypeError:
+            options_str += "\n" + item
     return options_str
 
 
@@ -113,7 +124,7 @@ def generate_output(user_id, selected_item=None):
     Find the relevant menu to display, based on user input and saved session info.
     """
 
-    # retrieve user's previous menu, if available
+    # retrieve user's session, if available
     previous_menu = get_user_menu(user_id)
     logger.debug("PREVIOUS MENU: " + str(previous_menu))
 
@@ -125,37 +136,47 @@ def generate_output(user_id, selected_item=None):
             previous_menu = previous_menu[0:-1]
         selected_item = None
 
-    # find relevant submenu
     sub_menu = menu
-    if previous_menu:
-        try:
-            for i in previous_menu:
-                sub_menu = sub_menu[1][int(i)]
-        except Exception:
-            logger.error("Could not retrieve previous menu: " + str(previous_menu))
-            previous_menu = None
-            pass
+    try:
+        # select user's previous menu
+        if previous_menu:
+            try:
+                for i in previous_menu:
+                    sub_menu = sub_menu['content'][int(i)]
+            except Exception:
+                logger.error("Could not retrieve previous menu: " + str(previous_menu))
+                previous_menu = None
+                pass
 
-    # select the given option
-    if selected_item:
-        try:
-            if len(sub_menu) == 2:  # otherwise this is an endpoint, not a menu
-                sub_menu = sub_menu[1][selected_item-1]
-                if previous_menu:
-                    previous_menu += str(selected_item-1)
-                else:
-                    previous_menu = str(selected_item-1)
-            else:
-                raise IndexError
-        except IndexError:
-            logger.debug("Invalid option chosen.")
-            pass
+        # select the given option
+        if selected_item:
+            index = selected_item - 1
+            try:
+                if type(sub_menu['content'][index]) == dict:
+                    sub_menu = sub_menu['content'][index]
+                    if previous_menu:
+                        previous_menu += str(index)
+                    else:
+                        previous_menu = str(index)
+            except TypeError:
+                # This is not a new menu, but an endpoint
+                logger.debug("endpoint")
+                pass
+            except IndexError:
+                # The selected option is not available
+                logger.debug("out of bounds")
+                pass
+
+    except Exception:
+        previous_menu = None
+        pass
 
     # save user's menu to the session
     mark_menu(user_id, previous_menu)
 
     # return the menu's string representation
-    str_out = serialize_options(sub_menu)
+    logger.debug(simplejson.dumps(sub_menu, indent=4))
+    str_out = serialize_options(sub_menu, selected_item)
     return str_out
 
 
@@ -173,9 +194,9 @@ def message():
         logger.debug(simplejson.dumps(msg, indent=4))
 
         try:
-            user_id = msg['from_addr']
-            content = msg['content']
-            message_id = msg['message_id']
+            user_id = msg['from_addr']  # user's cellphone number
+            content = msg['content']  # selected menu item, if any
+            message_id = msg['message_id']  # vumi's identifier
             mark_online(user_id)
             selected_item = None
             try:
