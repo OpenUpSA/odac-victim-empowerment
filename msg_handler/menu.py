@@ -243,33 +243,3 @@ menu = {
         },
         ]
 }
-
-#(
-#    "Complaint", [
-#        #6.1.	If a service provider has treated you unfairly or didn't do what they are legally required to do you can make a complaint. Who would you like to complain about?
-#
-#        #6.1.1.	a Hospital, clinic, doctor or nurse
-#        #6.1.1.1.	Enter a number where you would like to be called back
-#        #6.1.1.1.1.	Thank you. You should receive a call within 12 hours
-#        #6.1.1.2.	Call Rape Crisis to help you with the compliant
-#        #6.1.1.2.1.	Please call Rape Crisis: Observatory 021 447 9762 / Athlone 021 633 9229 / Khayelitsha 021 361 9085
-#
-#        #6.1.2.	a SAPS member / investigating officer
-#        #6.1.2.1.	Enter a number where you would like to be called back
-#        #6.1.2.1.1.	Thank you. You should receive a call within 12 hours
-#        #6.1.2.2.	Call Rape Crisis to help you with the compliant
-#        #6.1.2.2.1.	Please call Rape Crisis: Observatory 021 447 9762 / Athlone 021 633 9229 / Khayelitsha 021 361 9085
-#
-#        #6.1.3.	a Prosecutor or magistrate
-#        #6.1.3.1.	Enter a number where you would like to be called back
-#        #6.1.3.1.1.	Thank you. You should receive a call within 12 hours
-#        #6.1.3.2.	Call Rape Crisis to help you with the compliant
-#        #6.1.3.2.1.	Please call Rape Crisis: Observatory 021 447 9762 / Athlone 021 633 9229 / Khayelitsha 021 361 9085
-#
-#        #6.1.4.	a Social worker or NGO
-#        #6.1.4.1.	Enter a number where you would like to be called back
-#        #6.1.4.1.1.	Thank you. You should receive a call within 12 hours
-#        #6.1.4.2.	Call Rape Crisis to help you with the compliant
-#        #6.1.4.2.1.	Please call Rape Crisis: Observatory 021 447 9762 / Athlone 021 633 9229 / Khayelitsha 021 361 9085
-#    ]
-#)
