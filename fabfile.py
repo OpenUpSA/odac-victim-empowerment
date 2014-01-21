@@ -8,14 +8,38 @@ def staging():
     Env parameters for the staging environment.
     """
 
-    env.hosts = ['ec2-54-194-94-222.eu-west-1.compute.amazonaws.com']
+    env.hosts = ['ec2-54-194-198-122.eu-west-1.compute.amazonaws.com']
     env.envname = 'staging'
     env.user = 'ubuntu'
     env.group = 'ubuntu'
     env.key_filename = '~/.ssh/aws_code4sa.pem'
-    env['code_dir'] = '/var/www/victim-empowerment'
+    env['code_dir'] = '/var/www/odac-victim-empowerment'
     env['config_dir'] = 'config_staging'
     print("STAGING ENVIRONMENT\n")
+
+
+def production():
+    """
+    Env parameters for the production environment.
+    """
+
+    env.hosts = ['ec2-54-194-94-222.eu-west-1.compute.amazonaws.com']
+    env.envname = 'production'
+    env.user = 'ubuntu'
+    env.group = 'ubuntu'
+    env.key_filename = '~/.ssh/aws_code4sa.pem'
+    env['code_dir'] = '/var/www/odac-victim-empowerment'
+    env['config_dir'] = 'config_production'
+    print("PRODUCTION ENVIRONMENT\n")
+
+
+def configure_redis():
+
+    # upload config file
+    put('instance/redis.conf', '/tmp/redis.conf')
+    sudo('mv -f /tmp/redis.conf /etc/redis/6379.conf')
+
+    return
 
 
 def install_redis():
@@ -35,10 +59,11 @@ def install_redis():
                 sudo('cp src/redis-server /usr/local/bin/')
                 sudo('cp src/redis-cli /usr/local/bin/')
             with settings(warn_only=True):
-                # create dir for config files and data
+                # create dir for config files, data and log
                 sudo('mkdir /etc/redis')
                 sudo('mkdir /var/redis')
-                # init file for handling server restart
+                sudo('touch /var/log/redis_6379.log')
+            # init file for handling server restart
             sudo('cp utils/redis_init_script /etc/init.d/redis_6379')
             # copy config file
             sudo('cp redis.conf /etc/redis/6379.conf')
@@ -48,15 +73,10 @@ def install_redis():
 
             # ensure redis restarts if the server reboots
             sudo('update-rc.d redis_6379 defaults')
-    return
 
-
-def configure_redis():
-
-    # upload config file
-    put('instance/redis.conf', '/tmp/redis.conf')
-    sudo('mv -f /tmp/redis.conf /etc/redis/6379.conf')
-
+    configure_redis()
+    # reboot once, to let redis start up automatically
+    sudo('reboot')
     return
 
 
@@ -74,15 +94,27 @@ def restart_redis():
     return
 
 
+def restart():
+
+    with settings(warn_only=True):
+        sudo('service nginx restart')
+        sudo('service uwsgi restart')
+    return
+
+
 def setup():
     """
     Install dependencies and create an application directory.
     """
 
+    with settings(warn_only=True):
+        sudo('service nginx stop')
+
     # update locale
     sudo('locale-gen en_ZA.UTF-8')
 
-    # install pip
+    # install packages
+    sudo('apt-get install build-essential python python-dev')
     sudo('apt-get install python-pip')
 
     # TODO: setup virtualenv
@@ -91,9 +123,9 @@ def setup():
     with settings(warn_only=True):
         if run("test -d %s" % env['code_dir']).failed:
             # create project folder
-            sudo('mkdir -p /var/www/victim-empowerment')
-            sudo('mkdir -p /var/www/victim-empowerment/msg_handler')
-            sudo('mkdir /var/www/victim-empowerment/instance')
+            sudo('mkdir -p /var/www/odac-victim-empowerment')
+            sudo('mkdir -p /var/www/odac-victim-empowerment/msg_handler')
+            sudo('mkdir /var/www/odac-victim-empowerment/instance')
 
     # clear pip's cache
     with settings(warn_only=True):
@@ -104,51 +136,73 @@ def setup():
     put('requirements/production.txt', '/tmp/production.txt')
     sudo('pip install -r /tmp/production.txt')
 
-    # install apache2 and mod-wsgi
-    sudo('apt-get install apache2')
-    sudo('apt-get install libapache2-mod-wsgi')
-
-    # ensure that apache user www-data has access to the application folder
-    sudo('chmod -R 770 /var/www/victim-empowerment')
-    sudo('chown -R ' + env.user + ':www-data /var/www/victim-empowerment')
+    # install nginx
+    sudo('apt-get install nginx')
+    # restart nginx after reboot
+    sudo('update-rc.d nginx defaults')
+    sudo('service nginx start')
+    
+    # ensure that www-data has access to the application folder
+    sudo('chmod -R 770 /var/www/odac-victim-empowerment')
+    sudo('chown -R www-data:www-data /var/www/odac-victim-empowerment')
+    
+    return
 
 
 def configure():
     """
-    Upload config files, and restart apache.
+    Configure uwsgi, Nginx & Flask. Then restart.
     """
 
-    # upload files to /tmp
-    put(env.config_dir + '/apache.conf', '/tmp/apache.conf')
-    put(env.config_dir + '/config.py', '/tmp/config.py')
-    put(env.config_dir + '/wsgi.py', '/tmp/wsgi.py')
-
-    # move files to their intended directories
-    sudo('mv -f /tmp/apache.conf /etc/apache2/sites-available/apache.conf')
-    sudo('mv -f /tmp/config.py /var/www/victim-empowerment/instance/config.py')
-    sudo('mv -f /tmp/wsgi.py /var/www/victim-empowerment/wsgi.py')
-
-    # de-activate default site
     with settings(warn_only=True):
-        sudo('a2dissite 000-default')
+        sudo('stop uwsgi')
 
-    ## enable apache's caching plugin
-    #sudo('a2enmod expires')
-    #
-    ## enable apache's gzip plugin
-    #sudo('a2enmod deflate')
+    with settings(warn_only=True):
+        # disable default site
+        sudo('rm /etc/nginx/sites-enabled/default')
 
-    # activate site
-    sudo('a2ensite apache.conf')
+    # upload nginx server blocks (virtualhost)
+    put(env['config_dir'] + '/nginx.conf', '/tmp/nginx.conf')
+    sudo('mv /tmp/nginx.conf /var/www/odac-victim-empowerment/nginx.conf')
 
-    # restart apache
-    sudo('/etc/init.d/apache2 reload')
+    with settings(warn_only=True):
+        sudo('ln -s /var/www/odac-victim-empowerment/nginx.conf /etc/nginx/conf.d/')
 
+    # upload uwsgi config
+    put(env['config_dir'] + '/uwsgi.ini', '/tmp/uwsgi.ini')
+    sudo('mv /tmp/uwsgi.ini /var/www/odac-victim-empowerment/uwsgi.ini')
+
+    # make directory for uwsgi's log
+    with settings(warn_only=True):
+        sudo('mkdir -p /var/log/uwsgi')
+
+    with settings(warn_only=True):
+        sudo('mkdir -p /etc/uwsgi/vassals')
+
+    # upload upstart configuration for uwsgi 'emperor', which spawns uWSGI processes
+    put(env['config_dir'] + '/uwsgi.conf', '/tmp/uwsgi.conf')
+    sudo('mv /tmp/uwsgi.conf /etc/init/uwsgi.conf')
+
+    with settings(warn_only=True):
+        # create symlinks for emperor to find config file
+        sudo('ln -s /var/www/odac-victim-empowerment/uwsgi.ini /etc/uwsgi/vassals')
+
+    sudo('chown -R www-data:www-data /var/log/uwsgi')
+    sudo('chown -R www-data:www-data /var/www/odac-victim-empowerment')
+
+    # upload flask config
+    with settings(warn_only=True):
+        sudo('mkdir /var/www/odac-victim-empowerment/instance')
+    put(env['config_dir'] + '/config.py', '/tmp/config.py')
+    sudo('mv /tmp/config.py /var/www/odac-victim-empowerment/instance/config.py')
+
+    restart()
+    return
 
 
 def deploy():
     """
-    Upload our package to the server, unzip it, and restart apache.
+    Upload our package to the server, unzip it, and restart.
     """
 
     # create a tarball of our package
@@ -157,12 +211,11 @@ def deploy():
     # upload the source tarball to the temporary folder on the server
     put('msg_handler.tar.gz', '/tmp/msg_handler.tar.gz')
 
-    # turn off apache
     with settings(warn_only=True):
-        sudo('/etc/init.d/apache2 stop')
+        sudo('service nginx stop')
 
     # enter application directory
-    with cd('/var/www/victim-empowerment'):
+    with cd('/var/www/odac-victim-empowerment'):
         # and unzip new files
         sudo('tar xzf /tmp/msg_handler.tar.gz')
 
@@ -170,13 +223,16 @@ def deploy():
     sudo('rm /tmp/msg_handler.tar.gz')
     local('rm msg_handler.tar.gz')
 
+    sudo('touch /var/www/odac-victim-empowerment/msg_handler/uwsgi.sock')
+
     # clean out old logfiles
     with settings(warn_only=True):
-        sudo('rm /var/www/victim-empowerment/msg_handler/debug.log*')
+        sudo('rm /var/www/odac-victim-empowerment/msg_handler/debug.log*')
 
-    # ensure that apache user has access to all files
-    sudo('chmod -R 770 /var/www/victim-empowerment/msg_handler')
-    sudo('chown -R ' + env.user + ':www-data /var/www/victim-empowerment/msg_handler')
+    # ensure user www-data has access to the application folder
+    sudo('chown -R www-data:www-data /var/www/odac-victim-empowerment')
+    sudo('chmod -R 775 /var/www/odac-victim-empowerment')
 
     # and finally reload the application
-    sudo('/etc/init.d/apache2 start')
+    restart()
+    return
