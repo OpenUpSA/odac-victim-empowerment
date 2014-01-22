@@ -18,21 +18,6 @@ def staging():
     print("STAGING ENVIRONMENT\n")
 
 
-def production():
-    """
-    Env parameters for the production environment.
-    """
-
-    env.hosts = ['ec2-54-194-94-222.eu-west-1.compute.amazonaws.com']
-    env.envname = 'production'
-    env.user = 'ubuntu'
-    env.group = 'ubuntu'
-    env.key_filename = '~/.ssh/aws_code4sa.pem'
-    env['code_dir'] = '/var/www/odac-victim-empowerment'
-    env['config_dir'] = 'config_production'
-    print("PRODUCTION ENVIRONMENT\n")
-
-
 def configure_redis():
 
     # upload config file
