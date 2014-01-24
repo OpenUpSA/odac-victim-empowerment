@@ -1,7 +1,7 @@
 from flask import request, make_response, render_template
 from msg_handler import app, redis
 from msg_handler.menu import menu
-import simplejson
+import json
 import time
 from msg_handler import logger
 import requests
@@ -41,13 +41,14 @@ def get_user_menu(user_id):
     """
 
     menu_marker = redis.get('user-menu/%s' % user_id)
-    try:
-        # ensure the retrieved item can be converted to int
-        tmp = int(menu_marker)
-    except Exception:
-        logger.exception("Bad session data encountered.")
-        menu_marker = None
-        pass
+    if menu_marker is not None:
+        try:
+            # ensure the retrieved item can be converted to int
+            tmp = int(menu_marker)
+        except Exception:
+            logger.exception("Bad session data encountered.")
+            menu_marker = None
+            pass
     return menu_marker
 
 
@@ -56,37 +57,6 @@ def get_online_users():
     minutes = xrange(app.config['ONLINE_LAST_MINUTES'])
     return redis.sunion(['online-users/%d' % (current - x)
                          for x in minutes])
-
-
-@app.route('/')
-def index():
-    """
-    Basic index view, listing online users.
-    """
-
-    msg = 'Online: %s' % ', '.join(get_online_users())
-    return make_response(msg)
-
-
-def reply(message_id, content, session_event="resume"):
-    """
-    Send USSD reply vie vumi's HTTP API.
-    """
-
-    access_token = app.config['ACCESS_TOKEN']
-    account_key = app.config['ACCOUNT_KEY']
-    conversation_key = app.config['CONVERSATION_KEY']
-    message_url = 'http://go.vumi.org/api/v1/go/http_api/%s/messages.json' % (
-        conversation_key,)
-
-    payload = {
-        "in_reply_to": message_id,
-        "content": content,
-        "session_event": session_event,
-        }
-    requests.put(message_url, auth=(account_key, access_token),
-                 data=simplejson.dumps(payload))
-    return
 
 
 def serialize_options(sub_menu, selected_endpoint=None):
@@ -183,9 +153,39 @@ def generate_output(user_id, selected_item=None):
     mark_menu(user_id, previous_menu)
 
     # return the menu's string representation
-    logger.debug(simplejson.dumps(sub_menu, indent=4))
     str_out = serialize_options(sub_menu, selected_endpoint)
     return str_out
+
+
+def reply(message_id, content, session_event="resume"):
+    """
+    Send USSD reply via vumi's HTTP API.
+    """
+
+    access_token = app.config['ACCESS_TOKEN']
+    account_key = app.config['ACCOUNT_KEY']
+    conversation_key = app.config['CONVERSATION_KEY']
+    message_url = 'http://go.vumi.org/api/v1/go/http_api/%s/messages.json' % (
+        conversation_key,)
+
+    payload = {
+        "in_reply_to": message_id,
+        "content": content,
+        "session_event": session_event,
+        }
+    requests.put(message_url, auth=(account_key, access_token),
+                 data=json.dumps(payload))
+    return
+
+
+@app.route('/')
+def index():
+    """
+    Basic index view, listing online users.
+    """
+
+    msg = 'Online: %s' % ', '.join(get_online_users())
+    return make_response(msg)
 
 
 @app.route('/message/', methods=['GET', 'POST'])
@@ -199,7 +199,7 @@ def message():
     if request.method == 'POST':
 
         msg = request.get_json()
-        logger.debug(simplejson.dumps(msg, indent=4))
+        logger.debug(json.dumps(msg, indent=4))
 
         try:
             user_id = msg['from_addr']  # user's cellphone number
@@ -230,5 +230,5 @@ def event():
 
     logger.debug("EVENT endpoint called")
     tmp = request.get_json()
-    logger.debug(simplejson.dumps(tmp, indent=4))
+    logger.debug(json.dumps(tmp, indent=4))
     return make_response("OK")
