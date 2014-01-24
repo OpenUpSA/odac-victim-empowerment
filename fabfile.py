@@ -212,7 +212,7 @@ def deploy():
 
     # clean out old logfiles
     with settings(warn_only=True):
-        sudo('rm /var/www/odac-victim-empowerment/msg_handler/debug.log*')
+        sudo('rm /var/www/odac-victim-empowerment/debug.log*')
 
     # ensure user www-data has access to the application folder
     sudo('chown -R www-data:www-data /var/www/odac-victim-empowerment')

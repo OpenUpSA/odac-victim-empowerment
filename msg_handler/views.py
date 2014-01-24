@@ -4,7 +4,12 @@ from msg_handler.menu import menu
 import json
 import time
 from msg_handler import logger
-import requests
+from msg_handler.vumi_go import VumiMessage
+
+
+# TODO: move these authentication variables out of the git repo
+ACCESS_TOKEN = app.config['ACCESS_TOKEN']
+ACCOUNT_KEY = app.config['ACCOUNT_KEY']
 
 
 def mark_online(user_id):
@@ -157,27 +162,6 @@ def generate_output(user_id, selected_item=None):
     return str_out
 
 
-def reply(message_id, content, session_event="resume"):
-    """
-    Send USSD reply via vumi's HTTP API.
-    """
-
-    access_token = app.config['ACCESS_TOKEN']
-    account_key = app.config['ACCOUNT_KEY']
-    conversation_key = app.config['CONVERSATION_KEY']
-    message_url = 'http://go.vumi.org/api/v1/go/http_api/%s/messages.json' % (
-        conversation_key,)
-
-    payload = {
-        "in_reply_to": message_id,
-        "content": content,
-        "session_event": session_event,
-        }
-    requests.put(message_url, auth=(account_key, access_token),
-                 data=json.dumps(payload))
-    return
-
-
 @app.route('/')
 def index():
     """
@@ -196,15 +180,17 @@ def message():
 
     logger.debug("MESSAGE endpoint called")
 
+    # TODO: filter out service messages, such as "content": "state: wait_ussrc"
+
     if request.method == 'POST':
 
-        msg = request.get_json()
-        logger.debug(json.dumps(msg, indent=4))
+        tmp = request.get_json()
+        msg = VumiMessage(tmp)
+        logger.debug(msg)
 
         try:
-            user_id = msg['from_addr']  # user's cellphone number
-            content = msg['content']  # selected menu item, if any
-            message_id = msg['message_id']  # vumi's identifier
+            user_id = msg.from_addr  # user's cellphone number
+            content = msg.content  # selected menu item, if any
             mark_online(user_id)
             selected_item = None
             try:
@@ -215,7 +201,7 @@ def message():
             if app.debug:
                 logger.debug(reply_content)
             else:
-                reply(message_id, reply_content)
+                msg.reply(reply_content, ACCESS_TOKEN, ACCOUNT_KEY)
         except Exception as e:
             logger.exception(e)
             pass
