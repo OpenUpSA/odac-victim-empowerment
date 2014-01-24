@@ -1,5 +1,8 @@
 import logging
 from flask import Flask
+from redis import Redis
+
+redis = Redis()
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py', silent=True)

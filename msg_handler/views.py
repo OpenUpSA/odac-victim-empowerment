@@ -1,15 +1,10 @@
-from flask import request, make_response, url_for, render_template, abort, send_from_directory
-from msg_handler import app
+from flask import request, make_response, render_template
+from msg_handler import app, redis
 from msg_handler.menu import menu
-import requests
 import simplejson
 import time
-from datetime import datetime, date
 from msg_handler import logger
 import requests
-from redis import Redis
-
-redis = Redis()
 
 
 def mark_online(user_id):

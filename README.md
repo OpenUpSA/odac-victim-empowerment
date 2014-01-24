@@ -16,7 +16,7 @@ Logs can be found at:
 
 * Flask:
 
-        /var/www/victim-empowerment/debug.log
+        /var/www/odac-victim-empowerment/debug.log
 
 * Nginx:
 

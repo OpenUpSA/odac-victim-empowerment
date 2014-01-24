@@ -19,14 +19,13 @@ class MsgHandlerTestCase(unittest.TestCase):
         """
         assert 'OK' in self.send_msg()
 
-    # TODO: handle Redis connection while testing
-    # def test_populated_cache(self):
-    #     """
-    #     Check that a user's details are retained in the cache, after sending a message.
-    #     """
-    #     tmp = self.send_msg()
-    #     rv = self.app.get('/')
-    #     assert '+27738257667' in rv.data
+    def test_populated_cache(self):
+        """
+        Check that a user's details are retained in the cache, after sending a message.
+        """
+        tmp = self.send_msg()
+        rv = self.app.get('/')
+        assert '+27738257667' in rv.data
 
 
 if __name__ == '__main__':
