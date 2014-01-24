@@ -2,3 +2,4 @@ Flask
 simplejson
 requests==2.0.1
 redis
+hiredis
