@@ -46,7 +46,7 @@ def get_user_menu(user_id):
     """
 
     menu_marker = redis.get('user-menu/%s' % user_id)
-    if menu_marker is not None:
+    if not menu_marker in [None, 'None']:  # the serializer may return a string
         try:
             # ensure the retrieved item can be converted to int
             tmp = int(menu_marker)
@@ -186,25 +186,27 @@ def message():
 
         tmp = request.get_json()
         msg = VumiMessage(tmp)
-        logger.debug(msg)
-
-        try:
-            user_id = msg.from_addr  # user's cellphone number
-            content = msg.content  # selected menu item, if any
-            mark_online(user_id)
-            selected_item = None
+        if msg.content == "state: wait_ussrc":
+            logger.debug("End of session message received.")
+        else:
+            logger.debug(msg)
             try:
-                selected_item = int(content)
-            except (ValueError, TypeError):
+                user_id = msg.from_addr  # user's cellphone number
+                content = msg.content  # selected menu item, if any
+                mark_online(user_id)
+                selected_item = None
+                try:
+                    selected_item = int(content)
+                except (ValueError, TypeError):
+                    pass
+                reply_content = generate_output(user_id, selected_item)
+                if app.debug:
+                    logger.debug(reply_content)
+                else:
+                    msg.reply(reply_content, ACCESS_TOKEN, ACCOUNT_KEY)
+            except Exception as e:
+                logger.exception(e)
                 pass
-            reply_content = generate_output(user_id, selected_item)
-            if app.debug:
-                logger.debug(reply_content)
-            else:
-                msg.reply(reply_content, ACCESS_TOKEN, ACCOUNT_KEY)
-        except Exception as e:
-            logger.exception(e)
-            pass
     return make_response("OK")
 
 

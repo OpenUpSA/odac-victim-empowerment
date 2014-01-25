@@ -11,9 +11,9 @@ class MsgHandlerTestCase(unittest.TestCase):
         # self.base_url = 'http://ec2-54-194-198-122.eu-west-1.compute.amazonaws.com/'
 
     def send_msg(self, msg_type="USSD", content="1"):
-        filename = 'msg_handler/ussd_example.json'
+        filename = 'example_messages/ussd_example.json'
         if msg_type == "SMS":
-            filename = 'msg_handler/sms_example.json'
+            filename = 'example_messages/sms_example.json'
         f = open(filename, 'r')
         msg = simplejson.loads(f.read())
         msg['content'] = content
