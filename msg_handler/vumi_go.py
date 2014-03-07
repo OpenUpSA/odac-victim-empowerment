@@ -2,6 +2,11 @@ import json
 from datetime import datetime
 from msg_handler import logger
 import requests
+from msg_handler import app
+
+VUMI_ACCESS_TOKEN = app.config['VUMI_ACCESS_TOKEN']
+VUMI_ACCOUNT_KEY = app.config['VUMI_ACCOUNT_KEY']
+VUMI_CONVERSATION_KEY = app.config['VUMI_CONVERSATION_KEY']
 
 
 class VumiMessage():
@@ -19,7 +24,7 @@ class VumiMessage():
             logger.exception("Could not create VumiMessage instance.")
         return
 
-    def reply(self, content, access_token, account_key, session_event="resume"):
+    def reply(self, content, session_event="resume"):
         conversation_key = self.conversation_key
         message_url = 'http://go.vumi.org/api/v1/go/http_api/' + conversation_key + '/messages.json'
         payload = {
@@ -27,10 +32,10 @@ class VumiMessage():
             "content": content,
             "session_event": session_event,
             }
-        r = requests.put(message_url, auth=(account_key, access_token),
+        r = requests.put(message_url, auth=(VUMI_ACCOUNT_KEY, VUMI_ACCESS_TOKEN),
                      data=json.dumps(payload))
         if not r.status_code == 200:
-            logger.error("HTTP error encountered while trying to send message though VumiGo API.")
+            logger.error("HTTP error encountered while trying to send message through VumiGo API.")
         return r.text
 
     def __repr__(self):

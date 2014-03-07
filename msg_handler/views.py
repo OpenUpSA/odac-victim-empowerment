@@ -7,11 +7,6 @@ from msg_handler import logger
 from msg_handler.vumi_go import VumiMessage
 
 
-# TODO: move these authentication variables out of the git repo
-ACCESS_TOKEN = app.config['ACCESS_TOKEN']
-ACCOUNT_KEY = app.config['ACCOUNT_KEY']
-
-
 def mark_online(user_id):
     now = int(time.time())
     expires = now + (app.config['ONLINE_LAST_MINUTES'] * 60) + 10
@@ -203,7 +198,7 @@ def message():
                 if app.debug:
                     logger.debug(reply_content)
                 else:
-                    msg.reply(reply_content, ACCESS_TOKEN, ACCOUNT_KEY)
+                    msg.reply(reply_content)
             except Exception as e:
                 logger.exception(e)
                 pass

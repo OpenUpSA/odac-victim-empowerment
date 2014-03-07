@@ -14,7 +14,7 @@ def staging():
     env.group = 'ubuntu'
     env.key_filename = '~/.ssh/aws_code4sa.pem'
     env['code_dir'] = '/var/www/odac-victim-empowerment'
-    env['config_dir'] = 'config_staging'
+    env.config_dir = 'config_staging'
     print("STAGING ENVIRONMENT\n")
 
 
@@ -147,14 +147,14 @@ def configure():
         sudo('rm /etc/nginx/sites-enabled/default')
 
     # upload nginx server blocks (virtualhost)
-    put(env['config_dir'] + '/nginx.conf', '/tmp/nginx.conf')
+    put(env.config_dir + '/nginx.conf', '/tmp/nginx.conf')
     sudo('mv /tmp/nginx.conf /var/www/odac-victim-empowerment/nginx.conf')
 
     with settings(warn_only=True):
         sudo('ln -s /var/www/odac-victim-empowerment/nginx.conf /etc/nginx/conf.d/')
 
     # upload uwsgi config
-    put(env['config_dir'] + '/uwsgi.ini', '/tmp/uwsgi.ini')
+    put(env.config_dir + '/uwsgi.ini', '/tmp/uwsgi.ini')
     sudo('mv /tmp/uwsgi.ini /var/www/odac-victim-empowerment/uwsgi.ini')
 
     # make directory for uwsgi's log
@@ -165,7 +165,7 @@ def configure():
         sudo('mkdir -p /etc/uwsgi/vassals')
 
     # upload upstart configuration for uwsgi 'emperor', which spawns uWSGI processes
-    put(env['config_dir'] + '/uwsgi.conf', '/tmp/uwsgi.conf')
+    put(env.config_dir + '/uwsgi.conf', '/tmp/uwsgi.conf')
     sudo('mv /tmp/uwsgi.conf /etc/init/uwsgi.conf')
 
     with settings(warn_only=True):
@@ -178,8 +178,10 @@ def configure():
     # upload flask config
     with settings(warn_only=True):
         sudo('mkdir /var/www/odac-victim-empowerment/instance')
-    put(env['config_dir'] + '/config.py', '/tmp/config.py')
+    put(env.config_dir + '/config.py', '/tmp/config.py')
     sudo('mv /tmp/config.py /var/www/odac-victim-empowerment/instance/config.py')
+    put(env.config_dir + '/config_private.py', '/tmp/config_private.py')
+    sudo('mv /tmp/config_private.py %s/instance/config_private.py' % env.code_dir)
 
     restart()
     return
