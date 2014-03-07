@@ -2,9 +2,12 @@ from flask import request, make_response, render_template
 from msg_handler import app, redis
 from msg_handler.menu import menu
 import json
-import time
+import datetime, time
 from msg_handler import logger
 from msg_handler.vumi_go import VumiMessage
+from mixpanel import Mixpanel
+
+mp = Mixpanel(app.config['MIXPANEL_PROJECT_TOKEN'])
 
 
 def mark_online(user_id):
@@ -154,6 +157,17 @@ def generate_output(user_id, selected_item=None):
 
     # return the menu's string representation
     str_out = serialize_options(sub_menu, selected_endpoint)
+
+    # track user activity in mixpanel
+    heading = str_out.split('\n')[0]
+    if not heading:
+        heading = "unknown"
+    mp.people_set(user_id, {
+        '$first_name': user_id,
+        'last_seen' : str(datetime.datetime.utcnow()),
+        'previous_menu': heading,
+    })
+    mp.track(user_id, heading)
     return str_out
 
 
