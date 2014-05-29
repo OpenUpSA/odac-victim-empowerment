@@ -74,7 +74,7 @@ menu = {
                     "title": "HIV",
                     "content": [
                         "It is important to start the medication to prevent you from getting HIV as soon as possible. This must be taken within 72 hours (3 days) of the rape.",
-                        "The counsellor or health worker will ask if they can do an HIV test because you can’t take  medication to prevent HIV if you are already HIV positive.",
+                        "The counsellor or health worker will ask if they can do an HIV test because you can't take  medication to prevent HIV if you are already HIV positive.",
                         "Write down when you started the medication. Set a reminder for yourself in your cellphone or diary to make sure you take your medication every day.",
                         "Set a reminder when the follow up visits are, and write down the address of the hospital/clinic to go to. You may get more medication at these visits.",
                         "This HIV prevention medication must be taken every day for 28 days (4 weeks).",
@@ -85,7 +85,7 @@ menu = {
                     "content": [
                         "You have the right to medication to prevent pregnancy because of the rape. This medication must be taken within 5 days.",
                         "If you become pregnant because of rape you can have an abortion free of charge if you are less than 20 weeks pregnant. Ask the health worker about this.",
-                        "If you become pregnant because of rape and you don’t want an abortion, talk to your social worker about adoption or other options.",
+                        "If you become pregnant because of rape and you don't want an abortion, talk to your social worker about adoption or other options.",
                         ]
                 },
                 {
@@ -98,7 +98,7 @@ menu = {
                 {
                     "title": "Forensic Exam",
                     "content": [
-                        "You should have a forensic exam for evidence even if you haven’t yet decided to open a case. This evidence can be used if you decide to lay a charge",
+                        "You should have a forensic exam for evidence even if you haven't yet decided to open a case. This evidence can be used if you decide to lay a charge",
                         "The health worker will ask if they can do a forensic exam on you to find evidence for the case. He/she will examine where you were touched.",
                         "The forensic exam has two parts: first, a physical exam where the doctor records your injuries and second taking biological evidence (like swabs)",
                         "If you are wearing the clothes from the rape, the nurse will take your clothes and underwear for evidence.",
@@ -172,7 +172,7 @@ menu = {
                     "title": "Identity parade",
                     "content": [
                         "If the police have arrested the rapist you may be asked to point them out from a group of people.", 
-                        "This might be scary, but the rapist will not be able to see you because they can’t see through the glass.",
+                        "This might be scary, but the rapist will not be able to see you because they can't see through the glass.",
                         ]
                 },
                 {
@@ -199,7 +199,7 @@ menu = {
                     "content": [
                         "When the police have investigated your case it will be sent to the lawyers at the court. This person is called the prosecutor.", 
                         "A case can only go to trial if there is enough evidence. The prosecutor will tell you whether your case will go to trial or not.", 
-                        "Many factors go into the decision to prosecute a case. If your case doesn’t go to trial, it doesn’t mean that no-one believes you, or that you were not raped.",
+                        "Many factors go into the decision to prosecute a case. If your case doesn't go to trial, it doesn't mean that no-one believes you, or that you were not raped.",
                         "You will not get your own lawyer. The prosecutor presents the case against the rapist in court, and tells what happened to you.", 
                         "It is important to write down the name and contact details of the prosecutor and to let him/her know if your own contact details have changed.",
                         "You may need ongoing counselling and support. Ask the prosecutor to refer you for counselling.  Write down the where you should go.",
@@ -212,7 +212,7 @@ menu = {
                         "You do not have to go to the bail hearing, but you may if you want to. It may be upsetting to see the rapist so take someone with you for support.",
                         "Bail usually has conditions. The rapist may have to give a deposit to guarantee that they will appear at the trial. They may have to promise not to contact you.",
                         "Before the bail hearing you should tell the investigating officer or prosecutor any reasons that the rapist(s) should not get bail (e.g. threats or stalking).",
-                        "If you’re worried about the rapist or their family/friends contacting, following or threatening you, you can apply for a protection order from the court.",
+                        "If you're worried about the rapist or their family/friends contacting, following or threatening you, you can apply for a protection order from the court.",
                         "If the rapist or his family/friends contacts, follows or threatens you, phone the investigating officer immediately.",
                         "If the rapist(s) does not receive bail he/she will go to prison until the trial.", 
                         ]
@@ -220,11 +220,11 @@ menu = {
                 {
                     "title": "Preparing for Trial",
                     "content": [
-                        "The prosecutor will ask you to meet, to go over your statement. If you don’t agree with anything in the statement, point it out to him /her.",
+                        "The prosecutor will ask you to meet, to go over your statement. If you don't agree with anything in the statement, point it out to him /her.",
                         "Once the trial date is set the prosecutor should thoroughly discuss your case  and explain your role. Write down the date of this meeting.",
                         "Ask the prosecutor if there are any services that can prepare you for trial and support you in court on the day.", 
                         "You can also take a friend or family with you to court for support, but they may not be able to be with you in court when you testify.",
-                        "Ask the prosecutor if you can testify by CCTV (camera) so that you won’t have to tell what happened to you in front of the rapist.",
+                        "Ask the prosecutor if you can testify by CCTV (camera) so that you won't have to tell what happened to you in front of the rapist.",
                         "You will receive a written notice to testify in court. This is called a subpoena, and it must be hand-delivered so keep your address  up to date.",
                         "The prosecutor should contact you before the trial to get a 'victim impact statement' that explains the effect of the rape on your life ", 
                         "If you are not contacted about a victim impact statement you should call the investigating officer/prosecutor.",
@@ -235,9 +235,9 @@ menu = {
                     "title": "Trial",
                     "content": [
                         "At the trial, you will be asked to tell what happened to you in court in front of the magistrate and the lawyers, and the rapist.",
-                        "At the trial you will hear if you will be allowed to testify by CCTV (camera) so that you won’t have to tell what happened to you in front of the rapist.",
-                        "Once the magistrate has heard evidence from the prosecutor and the rapist’s lawyer, he/she will decide if there is enough proof to find the  accused guilty.",
-                        "If the rapist is not found guilty it doesn’t mean that no-one believed you, or that the rape did not happen. Ask the prosecutor to explain the outcome.",
+                        "At the trial you will hear if you will be allowed to testify by CCTV (camera) so that you won't have to tell what happened to you in front of the rapist.",
+                        "Once the magistrate has heard evidence from the prosecutor and the rapist's lawyer, he/she will decide if there is enough proof to find the  accused guilty.",
+                        "If the rapist is not found guilty it doesn't mean that no-one believed you, or that the rape did not happen. Ask the prosecutor to explain the outcome.",
                         "If the rapist(s) is found guilty there will be a hearing to decide on their punishment.",
                         "The magistrate will use your 'victim impact statement' to help him/her decide on the punishment for the rapist.",
                         "If you have not given a victim impact statement you should call the prosecutor.",
